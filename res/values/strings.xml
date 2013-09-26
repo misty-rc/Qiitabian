@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Qiitabian</string>
+    <string name="setting">Setting</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+
+    <string name="action_preference">Setting</string>
+
+    <!-- Preference -->
+    <!-- preference category -->
+    <string name="pref_category_initial">Initialized</string>
+    <string name="pref_category_debug">Debug</string>
+    <string name="pref_category_etc">Etc</string>
+
+    <string name="pref_top_view_key">pref_top_view_key</string>
+    <string name="pref_top_view_title">TopView Content</string>
+    <string name="pref_top_view_dialogTitle">Choose top content when start application.</string>
+    <array name="pref_top_view_entries">
+        <item>stocks</item>
+        <item>own post</item>
+        <item>public</item>
+    </array>
+    <array name="pref_top_view_entry_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </array>
+
+    <string name="pref_delete_pref_key">pref_delete_pref_key</string>
+    <string name="pref_delete_pref_title">Application Initialize</string>
+    <string name="pref_delete_pref_summary">Delete all preference when start application next time.</string>
+
+    <string name="pref_enable_debug_key">pref_enable_debug_key</string>
+    <string name="pref_enable_debug_title">Debug Mode</string>
+    <string name="pref_enable_debug_summary">Enable debug mode</string>
+</resources>

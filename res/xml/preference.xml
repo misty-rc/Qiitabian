@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_category_initial">
+
+        <ListPreference
+            android:key="@string/pref_top_view_key"
+            android:title="@string/pref_top_view_title"
+            android:dialogTitle="@string/pref_top_view_dialogTitle"
+            android:defaultValue="0"
+            android:entries="@array/pref_top_view_entries"
+            android:entryValues="@array/pref_top_view_entries"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_category_etc">
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_category_debug">
+
+        <CheckBoxPreference
+            android:key="@string/pref_enable_debug_key"
+            android:title="@string/pref_enable_debug_title"
+            android:summary="@string/pref_enable_debug_summary"
+            android:defaultValue="false"
+            android:disableDependentsState="false"/>
+
+        <CheckBoxPreference
+            android:key="@string/pref_delete_pref_key"
+            android:title="@string/pref_delete_pref_title"
+            android:summary="@string/pref_delete_pref_summary"
+            android:defaultValue="false"
+            android:dependency="@string/pref_enable_debug_key"/>
+
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>
