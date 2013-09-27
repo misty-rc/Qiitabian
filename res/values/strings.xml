@@ -21,11 +21,11 @@
         <item>own post</item>
         <item>public</item>
     </array>
-    <array name="pref_top_view_entry_value">
+    <integer-array name="pref_top_view_entry_value">
         <item>0</item>
         <item>1</item>
         <item>2</item>
-    </array>
+    </integer-array>
 
     <string name="pref_delete_pref_key">pref_delete_pref_key</string>
     <string name="pref_delete_pref_title">Application Initialize</string>

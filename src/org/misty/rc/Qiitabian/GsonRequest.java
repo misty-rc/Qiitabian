@@ -1,5 +1,6 @@
 package org.misty.rc.Qiitabian;
 
+import android.util.Log;
 import com.android.volley.*;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
@@ -30,7 +31,7 @@ public class GsonRequest<T> extends Request<T> {
             Listener<T> listener,
             Response.ErrorListener errorListener) {
 
-        return new GsonRequest<T>(
+        GsonRequest<T> request = new GsonRequest<T>(
                 Method.GET,
                 url,
                 clazz,
@@ -39,6 +40,8 @@ public class GsonRequest<T> extends Request<T> {
                 listener,
                 errorListener
         );
+        setRequestParameter(request, clazz);
+        return request;
     }
 
     public static <T> GsonRequest POST(
@@ -48,7 +51,7 @@ public class GsonRequest<T> extends Request<T> {
             Listener<T> listener,
             Response.ErrorListener errorListener) {
 
-        return new GsonRequest<T>(
+        GsonRequest<T> request = new GsonRequest<T>(
                 Method.POST,
                 url,
                 clazz,
@@ -57,8 +60,18 @@ public class GsonRequest<T> extends Request<T> {
                 listener,
                 errorListener
         );
+        setRequestParameter(request, clazz);
+        return request;
     }
 
+    private static void setRequestParameter(GsonRequest request, Class clazz) {
+        request.setTag(clazz);
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        ));
+    }
 
     public GsonRequest(
             int method,
@@ -113,4 +126,10 @@ public class GsonRequest<T> extends Request<T> {
         public void onResponse(T response, Map<String, String> header);
     }
 
+    public static Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+            Log.d("qiita", volleyError.toString());
+        }
+    };
 }

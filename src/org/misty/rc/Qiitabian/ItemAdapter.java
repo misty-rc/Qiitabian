@@ -20,46 +20,48 @@ import org.misty.rc.Qiitabian.models.Item;
 public class ItemAdapter extends ArrayAdapter<Item> {
     private LayoutInflater inflater;
     private int layout;
-    private Item[] items;
     private ImageLoader imageLoader;
 
     public ItemAdapter(Context context, int textViewResourceId, Item[] objects) {
         super(context, textViewResourceId, objects);
-
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.layout = textViewResourceId;
-        this.items = objects;
-
         this.imageLoader = new ImageLoader(VolleyHolder.getRequestQueue(context), new QiitaImageCache());
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
+        ViewHolder holder;
+        Item item = getItem(position);
+
         if(convertView == null) {
-            view = this.inflater.inflate(this.layout, null);
+            convertView = inflater.inflate(layout, null);
+            holder = new ViewHolder();
+            holder.itemIcon = (NetworkImageView)convertView.findViewById(R.id.item_icon);
+            holder.accountState = (TextView)convertView.findViewById(R.id.account_state);
+            holder.itemTitle = (TextView)convertView.findViewById(R.id.item_title);
+            holder.itemTags = (TextView)convertView.findViewById(R.id.item_tags);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder)convertView.getTag();
         }
+        holder.itemIcon.setImageUrl(item.user.profile_image_url, imageLoader);
+        holder.accountState.setText(item.created_at_in_words);
+        holder.itemTitle.setText(item.title);
+        holder.itemTags.setText(item.tags.toString());
 
-        //profile icon
-        ((NetworkImageView)view.findViewById(R.id.item_icon))
-                .setImageUrl(items[position].user.profile_image_url, imageLoader);
-
-        //item state
-        ((TextView)view.findViewById(R.id.account_state))
-                .setText(items[position].created_at_in_words);
-
-        //title
-        ((TextView)view.findViewById(R.id.item_title))
-                .setText(items[position].title);
-
-        ((TextView)view.findViewById(R.id.item_tags))
-                .setText(items[position].tags.toString());
-
-        return view;
+        return convertView;
     }
 
     @Override
     public void add(Item object) {
         super.add(object);
+    }
+
+    private class ViewHolder {
+        NetworkImageView itemIcon;
+        TextView accountState;
+        TextView itemTitle;
+        TextView itemTags;
     }
 }

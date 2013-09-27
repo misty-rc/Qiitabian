@@ -1,7 +1,6 @@
 package org.misty.rc.Qiitabian;
 
 import android.text.TextUtils;
-import android.util.Log;
 import org.misty.rc.Qiitabian.models.Auth;
 
 import java.util.HashMap;
@@ -67,7 +66,7 @@ public class QiitaAPI {
         switch (config) {
             case 0:
                 //stocks
-                val += SUFFIX_STOCKS;
+                val += SUFFIX_STOCKS + QUERY_STRING + SUFFIX_TOKEN + token;
                 break;
             case 1:
                 //own post

@@ -22,21 +22,20 @@
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Text"
                 android:id="@+id/account_state"/>
 
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Text"
+                style="@style/ItemTitle"
                 android:id="@+id/item_title"/>
 
         <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New Text"
-                android:id="@+id/item_tags"
-                />
+                style="@style/ItemTags"
+                android:id="@+id/item_tags"/>
+
     </LinearLayout>
 
 

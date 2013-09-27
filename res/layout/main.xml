@@ -16,7 +16,7 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#111"
+        style="@style/DrawerBackground"
         android:orientation="vertical">
 
         <LinearLayout

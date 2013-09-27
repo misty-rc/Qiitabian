@@ -19,6 +19,7 @@ public class QiitaImageCache extends LruCache<String, Bitmap> implements ImageLo
         return cacheSize;
     }
 
+
     public QiitaImageCache() {
         this(getDefaultLruCacheSize());
     }

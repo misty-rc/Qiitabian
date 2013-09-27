@@ -14,10 +14,11 @@
 
     </PreferenceCategory>
 
+
     <PreferenceCategory
             android:title="@string/pref_category_etc">
-
     </PreferenceCategory>
+
 
     <PreferenceCategory
         android:title="@string/pref_category_debug">

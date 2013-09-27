@@ -18,23 +18,22 @@ import org.misty.rc.Qiitabian.models.Tag;
 public class TagAdapter extends ArrayAdapter<Tag> {
     private LayoutInflater inflater;
     private int layout;
-    private Tag[] tags;
 
     public TagAdapter(Context context, int textViewResourceId, Tag[] objects) {
         super(context, textViewResourceId, objects);
-
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.layout = textViewResourceId;
-        this.tags = objects;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
+        Tag tag = getItem(position);
+
         if(convertView == null) {
             view = this.inflater.inflate(this.layout, null);
         }
-        ((TextView)view.findViewById(R.id.tagname)).setText(tags[position].name);
+        ((TextView)view.findViewById(R.id.tagname)).setText(tag.name);
         return view;
     }
 

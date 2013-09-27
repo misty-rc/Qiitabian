@@ -54,9 +54,6 @@ public class LoginActivity extends Activity {
             //delete setting
             SharedPreferences.Editor editor = preferences.edit();
             editor.clear();
-//            editor.remove(Auth.URL_NAME);
-//            editor.remove(Auth.TOKEN);
-//            editor.putBoolean(getString(R.string.pref_delete_pref_key), false);
             editor.commit();
         }
 
@@ -76,7 +73,7 @@ public class LoginActivity extends Activity {
                     QiitaAPI.getToken(),
                     Auth.class,
                     QiitaAPI.getTokenParams(url_name, password),
-                    exAuthListener,
+                    authListener,
                     errorListener
             );
 
@@ -84,21 +81,9 @@ public class LoginActivity extends Activity {
         }
     };
 
-    private GsonRequest.Listener<Auth> exAuthListener = new GsonRequest.Listener<Auth>() {
+    private GsonRequest.Listener<Auth> authListener = new GsonRequest.Listener<Auth>() {
         @Override
         public void onResponse(Auth auth, Map<String, String> header) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(Auth.TOKEN, auth.token);
-            editor.putString(Auth.URL_NAME, auth.url_name);
-            editor.commit();
-
-            changeActivity();
-        }
-    };
-
-    private Response.Listener<Auth> authListener = new Response.Listener<Auth>() {
-        @Override
-        public void onResponse(Auth auth) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Auth.TOKEN, auth.token);
             editor.putString(Auth.URL_NAME, auth.url_name);
