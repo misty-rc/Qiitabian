@@ -3,7 +3,6 @@ package org.misty.rc.Qiitabian;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -13,23 +12,27 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import android.view.GestureDetector;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.deploygate.sdk.DeployGate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.misty.rc.Qiitabian.models.Auth;
-import org.misty.rc.Qiitabian.models.Item;
 import org.misty.rc.Qiitabian.models.Tag;
 import org.misty.rc.Qiitabian.models.User;
 
 import java.util.Map;
-import java.util.Set;
-
 
 public class MainActivity extends Activity {
     private String _url_name;
@@ -54,9 +57,21 @@ public class MainActivity extends Activity {
         //init application
         initialize();
 
+        Map<String, ?> pref = preferences.getAll();
+        Log.d("qiita", pref.toString());
+
         //test get userinfo
-//        getUser();
-        getItems(0);
+        fragmentChanger(0);
+    }
+
+
+    private void fragmentChanger(int mode) {
+        ContentFragment fragment = new ContentFragment(this, mode);
+        Bundle bundle = new Bundle();
+        bundle.putString(Auth.URL_NAME, _url_name);
+        bundle.putString(Auth.TOKEN, _token);
+        fragment.setArguments(bundle);
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
     private void initialize() {
@@ -76,14 +91,14 @@ public class MainActivity extends Activity {
         fragmentManager = getFragmentManager();
 
         //main layout with NavigationDrawer
-        drawerLayout = (DrawerLayout)findViewById(R.id.main_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.main_layout);
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
         //navigation drawer
-        drawer = (LinearLayout)findViewById(R.id.left_drawer_layout);
+        drawer = (LinearLayout) findViewById(R.id.left_drawer_layout);
 
         //list in navigation drawer
-        drawerList = (ListView)findViewById(R.id.left_drawer_list);
+        drawerList = (ListView) findViewById(R.id.left_drawer_list);
         drawerList.setOnItemClickListener(new TagClickListener());
         setTagList();
 
@@ -109,7 +124,7 @@ public class MainActivity extends Activity {
     }
 
     private void setProfileIcon(String url) {
-        NetworkImageView view = (NetworkImageView)findViewById(R.id.profile_icon);
+        NetworkImageView view = (NetworkImageView) findViewById(R.id.profile_icon);
         view.setImageUrl(url, imageLoader);
     }
 
@@ -144,7 +159,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(drawerToggle.onOptionsItemSelected(item)) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         } else
             switch (item.getItemId()) {
@@ -154,7 +169,7 @@ public class MainActivity extends Activity {
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);
-        }
+            }
     }
 
     /*
@@ -167,8 +182,7 @@ public class MainActivity extends Activity {
                 QiitaAPI.getFollowingTags(_url_name, _token),
                 Tag[].class,
                 tagListener,
-                errorListener);
-        request.setTag(this);
+                GsonRequest.errorListener);
         VolleyHolder.getRequestQueue(this).add(request);
     }
 
@@ -177,18 +191,7 @@ public class MainActivity extends Activity {
                 QiitaAPI.getUser(_token),
                 User.class,
                 userListener,
-                errorListener);
-        request.setTag(this);
-        VolleyHolder.getRequestQueue(this).add(request);
-    }
-
-    private void getItems(int config) {
-        GsonRequest request = GsonRequest.GET(
-                QiitaAPI.getItems(config, _token),
-                Item[].class,
-                itemListener,
-                errorListener);
-        request.setTag(this);
+                GsonRequest.errorListener);
         VolleyHolder.getRequestQueue(this).add(request);
     }
 
@@ -213,19 +216,9 @@ public class MainActivity extends Activity {
     *
     * */
 
-    private GsonRequest.Listener<Item[]> itemListener = new GsonRequest.Listener<Item[]>() {
-        @Override
-        public void onResponse(Item[] items, Map<String, String> header) {
-
-            ContentFragment fragment = new ContentFragment(getApplication(), items);
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        }
-    };
-
     private GsonRequest.Listener<Tag[]> tagListener = new GsonRequest.Listener<Tag[]>() {
         @Override
         public void onResponse(Tag[] tags, Map<String, String> header) {
-
             drawerList.setAdapter(new TagAdapter(getApplication(), R.layout.tag_item, tags));
         }
     };
@@ -248,40 +241,14 @@ public class MainActivity extends Activity {
         }
     };
 
-    private Response.ErrorListener errorListener = new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError volleyError) {
-
-        }
-    };
 
     /*
     * inner fragment
     *
     * */
-
-    public static class ContentFragment extends Fragment {
-        private Context context;
-        private Item[] items;
-
-        public ContentFragment(Context context, Item[] items) {
-            this.context = context;
-            this.items = items;
+    public class DebugFragment extends Fragment {
+        public DebugFragment() {
         }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View root = inflater.inflate(R.layout.content_fragment, container, false);
-
-            ((ListView)root.findViewById(R.id.content_list))
-                    .setAdapter(new ItemAdapter(context, R.layout.content_list_row, items));
-
-            return root;
-        }
-    }
-
-    public static class DebugFragment extends Fragment {
-        public DebugFragment() {}
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -290,7 +257,7 @@ public class MainActivity extends Activity {
             Bundle args = getArguments();
             String val = args.getString("debug");
 
-            ((TextView)root.findViewById(R.id.debug_textview)).setText(val);
+            ((TextView) root.findViewById(R.id.debug_textview)).setText(val);
 
             return root;
         }
@@ -305,7 +272,8 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onShowPress(MotionEvent e) {}
+        public void onShowPress(MotionEvent e) {
+        }
 
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
@@ -318,14 +286,15 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onLongPress(MotionEvent e) {}
+        public void onLongPress(MotionEvent e) {
+        }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             float dx = Math.abs(velocityX);
             float dy = Math.abs(velocityY);
-            if(dx > dy && dx > 200) {
-                if(e1.getX() - e2.getX() < 150) {
+            if (dx > dy && dx > 200) {
+                if (e1.getX() - e2.getX() < 150) {
                     drawerLayout.openDrawer(drawer);
                     return true;
                 }
