@@ -11,6 +11,10 @@ import com.deploygate.sdk.DeployGate;
  * To change this template use File | Settings | File Templates.
  */
 public class App extends Application {
+
+    public static final String TAG_CONTENT = "tag_content";
+    public static final String TAG_DETAIL = "tag_detail";
+
     @Override
     public void onCreate() {
         super.onCreate();

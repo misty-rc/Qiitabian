@@ -15,7 +15,7 @@ public class Item extends BaseModel {
 //    public String uuid;
     public User user;
     public String title;
-//    public String body;
+    public String body;
 //    public String created_at;
 //    public String updated_at;
     public String created_at_in_words;

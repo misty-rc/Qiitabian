@@ -3,6 +3,7 @@ package org.misty.rc.Qiitabian;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -49,6 +50,8 @@ public class MainActivity extends Activity {
 
     private ImageLoader imageLoader;
 
+    private Bundle _tokenSet;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,14 +67,14 @@ public class MainActivity extends Activity {
         fragmentChanger(0);
     }
 
-
     private void fragmentChanger(int mode) {
         ContentFragment fragment = new ContentFragment(this, mode);
-        Bundle bundle = new Bundle();
-        bundle.putString(Auth.URL_NAME, _url_name);
-        bundle.putString(Auth.TOKEN, _token);
-        fragment.setArguments(bundle);
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        fragment.setArguments(_tokenSet);
+
+        FragmentTransaction ts = fragmentManager.beginTransaction();
+        ts.add(R.id.content_frame, fragment, App.TAG_CONTENT);
+//        ts.addToBackStack(App.TAG_CONTENT);
+        ts.commit();
     }
 
     private void initialize() {
@@ -81,6 +84,11 @@ public class MainActivity extends Activity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         _url_name = preferences.getString(Auth.URL_NAME, null);
         _token = preferences.getString(Auth.TOKEN, null);
+
+        //set tokenset
+        _tokenSet = new Bundle();
+        _tokenSet.putString(Auth.URL_NAME, _url_name);
+        _tokenSet.putString(Auth.TOKEN, _token);
 
         gestureDetector = new GestureDetector(this, new FlingHandler());
 
@@ -101,6 +109,14 @@ public class MainActivity extends Activity {
         drawerList = (ListView) findViewById(R.id.left_drawer_list);
         drawerList.setOnItemClickListener(new TagClickListener());
         setTagList();
+
+        //profile -> own post
+        LinearLayout profile = (LinearLayout)findViewById(R.id.profile);
+        profile.setOnClickListener(new ProfileClickListener());
+
+        //profile -> stocks
+        TextView stocks = (TextView)findViewById(R.id.profile_stocks);
+        stocks.setOnClickListener(new StocksClickListener());
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,
@@ -207,6 +223,23 @@ public class MainActivity extends Activity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             drawerLayout.closeDrawer(drawer);
             //TODO: tag click -> list content with tag
+        }
+    }
+
+    private class ProfileClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            FragmentTransaction ts = fragmentManager.beginTransaction();
+            ts.commit();
+        }
+    }
+
+    private class StocksClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+
         }
     }
 

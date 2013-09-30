@@ -22,8 +22,8 @@ public class ItemAdapter extends ArrayAdapter<Item> {
     private int layout;
     private ImageLoader imageLoader;
 
-    public ItemAdapter(Context context, int textViewResourceId, Item[] objects) {
-        super(context, textViewResourceId, objects);
+    public ItemAdapter(Context context, int textViewResourceId) {
+        super(context, textViewResourceId);
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.layout = textViewResourceId;
         this.imageLoader = new ImageLoader(VolleyHolder.getRequestQueue(context), new QiitaImageCache());
@@ -51,11 +51,6 @@ public class ItemAdapter extends ArrayAdapter<Item> {
         holder.itemTags.setText(item.tags.toString());
 
         return convertView;
-    }
-
-    @Override
-    public void add(Item object) {
-        super.add(object);
     }
 
     private class ViewHolder {
