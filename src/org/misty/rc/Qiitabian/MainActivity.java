@@ -29,53 +29,55 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.misty.rc.Qiitabian.models.Auth;
-import org.misty.rc.Qiitabian.models.Tag;
-import org.misty.rc.Qiitabian.models.User;
+import org.misty.rc.Qiitabian.models.*;
 
 import java.util.Map;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ContentFragment.ContentChangeListener {
     private String _url_name;
     private String _token;
 
+    private App app;
     private SharedPreferences preferences;
     private FragmentManager fragmentManager;
     private GestureDetector gestureDetector;
 
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+    private TagAdapter tagAdapter;
     private LinearLayout drawer;
     private ActionBarDrawerToggle drawerToggle;
 
     private ImageLoader imageLoader;
 
-    private Bundle _tokenSet;
+    private Bundle _fragmentArgs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d("qiita", "activity:onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
         //init application
         initialize();
 
+        //for debug
         Map<String, ?> pref = preferences.getAll();
         Log.d("qiita", pref.toString());
 
         //test get userinfo
-        fragmentChanger(0);
+        if(savedInstanceState == null) {
+            Log.d("qiita", "activity:state null");
+            ContentFragment fragment = ContentFragment.newInstance();
+            fragment.setArguments(_fragmentArgs);
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "content").commit();
+        } else {
+            Log.d("qiita", "activity:state" + savedInstanceState.toString());
+
+//            fragmentChanger(0);
+        }
     }
 
-    private void fragmentChanger(int mode) {
-        ContentFragment fragment = new ContentFragment(this, mode);
-        fragment.setArguments(_tokenSet);
-
-        FragmentTransaction ts = fragmentManager.beginTransaction();
-        ts.add(R.id.content_frame, fragment, App.TAG_CONTENT);
-//        ts.addToBackStack(App.TAG_CONTENT);
-        ts.commit();
-    }
 
     private void initialize() {
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -85,10 +87,14 @@ public class MainActivity extends Activity {
         _url_name = preferences.getString(Auth.URL_NAME, null);
         _token = preferences.getString(Auth.TOKEN, null);
 
+        app = (App)this.getApplication();
+
         //set tokenset
-        _tokenSet = new Bundle();
-        _tokenSet.putString(Auth.URL_NAME, _url_name);
-        _tokenSet.putString(Auth.TOKEN, _token);
+        _fragmentArgs = new Bundle();
+        _fragmentArgs.putString(Auth.URL_NAME, _url_name);
+        _fragmentArgs.putString(Auth.TOKEN, _token);
+        _fragmentArgs.putString(App.API_URL, QiitaAPI.getTopViewItems(app.getTopViewDefault(), _token));
+//        _fragmentArgs.putString(app.getTopViewDefaultKey(), app.getTopViewDefault());
 
         gestureDetector = new GestureDetector(this, new FlingHandler());
 
@@ -108,6 +114,8 @@ public class MainActivity extends Activity {
         //list in navigation drawer
         drawerList = (ListView) findViewById(R.id.left_drawer_list);
         drawerList.setOnItemClickListener(new TagClickListener());
+        tagAdapter = new TagAdapter(this, R.layout.tag_item);
+        drawerList.setAdapter(tagAdapter);
         setTagList();
 
         //profile -> own post
@@ -188,6 +196,18 @@ public class MainActivity extends Activity {
             }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d("qiita", "activity:onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d("qiita", "activity:onRestoreInstanceState");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     /*
     * request queue
     *
@@ -222,6 +242,9 @@ public class MainActivity extends Activity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             drawerLayout.closeDrawer(drawer);
+            ListView list = (ListView)parent;
+            String item = (String)list.getItemAtPosition(position);
+            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTagItems(item, 1));
             //TODO: tag click -> list content with tag
         }
     }
@@ -239,10 +262,31 @@ public class MainActivity extends Activity {
 
         @Override
         public void onClick(View v) {
+            ContentFragment fragment = (ContentFragment)fragmentManager.findFragmentByTag("content");
+            if(fragment == null) {
+                fragment = ContentFragment.newInstance();
+            }
+            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTopViewItems(QiitaAPI.STOCKS, _token));
+            fragment.setArguments(_fragmentArgs);
 
+            FragmentTransaction ts = fragmentManager.beginTransaction();
+            ts.replace(R.id.content_frame, fragment, "content").commit();
         }
     }
 
+
+    @Override
+    public void changeDetailFragment(String uuid) {
+        DetailFragment fragment = (DetailFragment)fragmentManager.findFragmentByTag("detail");
+        if(fragment == null) {
+            fragment = DetailFragment.newInstance();
+        }
+        _fragmentArgs.putString("uuid", uuid);
+        fragment.setArguments(_fragmentArgs);
+
+        FragmentTransaction ts = fragmentManager.beginTransaction();
+        ts.addToBackStack(null).replace(R.id.content_frame, fragment, "detail").commit();
+    }
 
     /*
     * volley response listener
@@ -252,7 +296,8 @@ public class MainActivity extends Activity {
     private GsonRequest.Listener<Tag[]> tagListener = new GsonRequest.Listener<Tag[]>() {
         @Override
         public void onResponse(Tag[] tags, Map<String, String> header) {
-            drawerList.setAdapter(new TagAdapter(getApplication(), R.layout.tag_item, tags));
+            tagAdapter.addAll(tags);
+            drawerList.invalidateViews();
         }
     };
 

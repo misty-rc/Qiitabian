@@ -19,11 +19,17 @@ public class TagAdapter extends ArrayAdapter<Tag> {
     private LayoutInflater inflater;
     private int layout;
 
-    public TagAdapter(Context context, int textViewResourceId, Tag[] objects) {
-        super(context, textViewResourceId, objects);
+    public TagAdapter(Context context, int textViewResourceId) {
+        super(context, textViewResourceId);
         this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.layout = textViewResourceId;
     }
+
+//    public TagAdapter(Context context, int textViewResourceId, Tag[] objects) {
+//        super(context, textViewResourceId, objects);
+//        this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        this.layout = textViewResourceId;
+//    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {

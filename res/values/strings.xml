@@ -16,16 +16,17 @@
     <string name="pref_top_view_key">pref_top_view_key</string>
     <string name="pref_top_view_title">TopView Content</string>
     <string name="pref_top_view_dialogTitle">Choose top content when start application.</string>
-    <array name="pref_top_view_entries">
-        <item>stocks</item>
-        <item>own post</item>
-        <item>public</item>
-    </array>
-    <integer-array name="pref_top_view_entry_value">
+    <string-array name="pref_top_view_entries">
+        <item>Stocked items</item>
+        <item>My posted items</item>
+        <item>Public items</item>
+    </string-array>
+    <string-array name="pref_top_view_entries_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
-    </integer-array>
+    </string-array>
+    <string name="pref_top_view_entries_default_value">2</string>
 
     <string name="pref_delete_pref_key">pref_delete_pref_key</string>
     <string name="pref_delete_pref_title">Application Initialize</string>

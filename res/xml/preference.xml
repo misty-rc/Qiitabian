@@ -8,9 +8,8 @@
             android:key="@string/pref_top_view_key"
             android:title="@string/pref_top_view_title"
             android:dialogTitle="@string/pref_top_view_dialogTitle"
-            android:defaultValue="0"
             android:entries="@array/pref_top_view_entries"
-            android:entryValues="@array/pref_top_view_entries"/>
+            android:entryValues="@array/pref_top_view_entries_values"/>
 
     </PreferenceCategory>
 

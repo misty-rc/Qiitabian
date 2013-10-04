@@ -1,5 +1,6 @@
 package org.misty.rc.Qiitabian;
 
+import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
 import android.content.Context;
@@ -24,64 +25,112 @@ import java.util.Map;
  */
 
 public class ContentFragment extends ListFragment {
+
     private Context context;
-    private int _mode;
+//    private int _mode;
 
     private String _url_name;
     private String _token;
+    private String _url;
     private View _footer;
     private LayoutInflater _infrater;
-
+    private App app;
     private ItemAdapter _adapter;
 
     private static final int READING = 0;
     private static final int DONE = 1;
 
-    private View getFooter() {
-        if (_footer == null) {
-            _footer = _infrater.inflate(R.layout.list_footer, null);
-        }
-        return _footer;
+    private boolean isReading = false;
+    private boolean isCreatedView = false;
+
+    private StateHolder stateHolder;
+    private class StateHolder {
+        public String url;
+        public int page;
+        public boolean deadend = false;
     }
 
-    public ContentFragment(Context context, int mode) {
-        this.context = context;
-        this._mode = mode;
-        this._infrater = (LayoutInflater)this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this._adapter = new ItemAdapter(this.context, R.layout.content_list_row);
+    public interface ContentChangeListener {
+        public void changeDetailFragment(String uuid);
+    }
+
+    public static ContentFragment newInstance() {
+        return new ContentFragment();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            callback = (ContentChangeListener)activity;
+        } catch (ClassCastException ex) {
+            throw new ClassCastException(activity.toString()
+                    + "must implement ContentChangeListener");
+        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d("qiita", "fragment:onCreate");
         super.onCreate(savedInstanceState);
+
+        //retain => true
+        setRetainInstance(true);
+        app = (App)getActivity().getApplication();
+
+        //adapter init
+        this._adapter = new ItemAdapter(getActivity(), R.layout.content_list_row);
+        setListAdapter(_adapter);
+
         this._url_name = getArguments().getString(Auth.URL_NAME);
         this._token = getArguments().getString(Auth.TOKEN);
-
-        query();
+        this._url = getArguments().getString(App.API_URL);
+        if(stateHolder == null) {
+            Log.d("qiita", "fragment:stateholder init");
+            stateHolder = new StateHolder();
+            stateHolder.page = 1;
+            stateHolder.url = _url;
+        }
     }
 
-    private boolean isReading = false;
-
-    private void query() {
-        isReading = true;
-        changeFooterState(READING);
-        GsonRequest request = GsonRequest.GET(
-                QiitaAPI.getItems(_mode, _token),
-                Item[].class,
-                itemListener,
-                GsonRequest.errorListener
-        );
-        VolleyHolder.getRequestQueue(context).add(request);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d("qiita", "fragment:onCreateView");
         View root = inflater.inflate(R.layout.content_fragment, container, false);
-        ((ListView)root.findViewById(android.R.id.list)).addFooterView(getFooter()); //なんか違う気がする
-        ((ListView)root.findViewById(android.R.id.list)).setOnScrollListener(new scrollEnd());
-        setListAdapter(_adapter);
+        ListView list = (ListView)root.findViewById(android.R.id.list);
+        list.addFooterView(getFooter(inflater)); //なんか違う気がする
+        list.setOnScrollListener(new scrollEnd());
+        list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         return root;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d("qiita", "fragment:onActivityCreated");
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    private ContentChangeListener callback;
+
+
+    @Override
+    public void onPause() {
+        Log.d("qiita", "fragment:onPause");
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        Log.d("qiita", "fragment:onResume");
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.d("qiita", "fragment:onSaveInstanceState");
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -89,24 +138,9 @@ public class ContentFragment extends ListFragment {
         Item item = (Item) l.getItemAtPosition(position);
         Log.d("qiita", "position: " + position + " ,title: " + item.title);
 
-        DetailFragment fragment = new DetailFragment(context, item);
-        FragmentTransaction ts = getFragmentManager().beginTransaction();
-        ts.replace(R.id.content_frame, fragment, App.TAG_DETAIL);
-        ts.addToBackStack(null);
-        ts.commit();
+        callback.changeDetailFragment(item.uuid);
     }
 
-    private void changeFooterState(int mode) {
-        switch (mode) {
-            case READING:
-                _footer.findViewById(R.id.footer_read_progress).setVisibility(View.VISIBLE);
-                _footer.findViewById(R.id.footer_read_next).setVisibility(View.INVISIBLE);
-                break;
-            case DONE:
-                _footer.findViewById(R.id.footer_read_progress).setVisibility(View.INVISIBLE);
-                _footer.findViewById(R.id.footer_read_next).setVisibility(View.VISIBLE);
-        }
-    }
 
     private class scrollEnd implements AbsListView.OnScrollListener {
 
@@ -123,20 +157,47 @@ public class ContentFragment extends ListFragment {
                 return;
             }
 
-            if(totalItemCount == firstVisibleItem + visibleItemCount) {
-                query();
+            if(totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 0) {
+                if(!stateHolder.deadend) {
+                    query();
+                }
             }
         }
+    }
+
+    private View getFooter(LayoutInflater inflater) {
+        if (_footer == null) {
+            _footer = inflater.inflate(R.layout.list_footer, null);
+        }
+        return _footer;
+    }
+
+    private void query() {
+        Log.d("qiita", "fragment:query");
+        isReading = true;
+        GsonRequest request = GsonRequest.GET(
+                QiitaAPI.queryBuild(stateHolder.url, stateHolder.page),
+                Item[].class,
+                itemListener,
+                GsonRequest.errorListener
+        );
+        VolleyHolder.getRequestQueue(context).add(request);
     }
 
     GsonRequest.Listener<Item[]> itemListener = new GsonRequest.Listener<Item[]>() {
         @Override
         public void onResponse(Item[] items, Map<String, String> header) {
+            Log.d("qiita", "GsonRequest => onResponse");
             _adapter.addAll(items);
-            changeFooterState(DONE);
             getListView().invalidateViews();
+
+            if(items.length == 0 || items.length < QiitaAPI.PER_PAGE) {
+                stateHolder.deadend = true;
+                stateHolder.page = 0;
+            } else {
+                stateHolder.page += 1;
+            }
             isReading = false;
-            changeFooterState(DONE);
         }
     };
 }

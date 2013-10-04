@@ -17,6 +17,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="android-support-v4" level="project" />
     <orderEntry type="library" name="deploygatesdk" level="project" />
+    <orderEntry type="library" name="markdown4j-2.2" level="project" />
   </component>
 </module>
 

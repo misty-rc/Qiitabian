@@ -5,10 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import org.misty.rc.Qiitabian.models.Item;
+import org.misty.rc.Qiitabian.models.Tag;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,6 +43,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
             holder.accountState = (TextView)convertView.findViewById(R.id.account_state);
             holder.itemTitle = (TextView)convertView.findViewById(R.id.item_title);
             holder.itemTags = (TextView)convertView.findViewById(R.id.item_tags);
+            holder.itemTagLayout = (LinearLayout)convertView.findViewById(R.id.item_tag_layout);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder)convertView.getTag();
@@ -48,6 +51,16 @@ public class ItemAdapter extends ArrayAdapter<Item> {
         holder.itemIcon.setImageUrl(item.user.profile_image_url, imageLoader);
         holder.accountState.setText(item.created_at_in_words);
         holder.itemTitle.setText(item.title);
+
+        if(item.tags.length > 0) {
+            holder.itemTagLayout.removeAllViews();
+            for(Tag tag : item.tags) {
+                TextView tagtv = new TextView(getContext());
+                tagtv.setText(tag.name);
+                holder.itemTagLayout.addView(tagtv);
+            }
+        }
+
         holder.itemTags.setText(item.tags.toString());
 
         return convertView;
@@ -58,5 +71,6 @@ public class ItemAdapter extends ArrayAdapter<Item> {
         TextView accountState;
         TextView itemTitle;
         TextView itemTags;
+        LinearLayout itemTagLayout;
     }
 }

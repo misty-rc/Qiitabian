@@ -11,11 +11,13 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Item extends BaseModel {
 
+    public static final String UUID = "uuid";
+
     public int id;
-//    public String uuid;
+    public String uuid;
     public User user;
     public String title;
-    public String body;
+//    public String body;
 //    public String created_at;
 //    public String updated_at;
     public String created_at_in_words;
@@ -26,7 +28,7 @@ public class Item extends BaseModel {
 //    public int comment_count;
     public String url;
 //    public String gist_url;
-    public boolean tweet;
+//    public boolean tweet;
 //    @SerializedName("private") public boolean private_flag;
 //    public boolean stocked;
 }
