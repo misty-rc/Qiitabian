@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import org.misty.rc.Qiitabian.models.Auth;
 import org.misty.rc.Qiitabian.models.Item;
 
@@ -179,23 +181,40 @@ public class ContentFragment extends ListFragment {
                 QiitaAPI.queryBuild(stateHolder.url, stateHolder.page),
                 Item[].class,
                 itemListener,
-                GsonRequest.errorListener
+                errorListener
         );
         VolleyHolder.getRequestQueue(context).add(request);
     }
+
+    public void resetStateHolder(String url) {
+        stateHolder.url = url;
+        stateHolder.page = 1;
+        stateHolder.deadend = false;
+        _adapter.clear();
+    }
+
+    Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+            Log.d("qiita", volleyError.toString());
+            isReading = false;
+        }
+    };
 
     GsonRequest.Listener<Item[]> itemListener = new GsonRequest.Listener<Item[]>() {
         @Override
         public void onResponse(Item[] items, Map<String, String> header) {
             Log.d("qiita", "GsonRequest => onResponse");
-            _adapter.addAll(items);
-            getListView().invalidateViews();
+            if(isVisible()) {
+                _adapter.addAll(items);
+                getListView().invalidateViews();
 
-            if(items.length == 0 || items.length < QiitaAPI.PER_PAGE) {
-                stateHolder.deadend = true;
-                stateHolder.page = 0;
-            } else {
-                stateHolder.page += 1;
+                if(items.length == 0 || items.length < QiitaAPI.PER_PAGE) {
+                    stateHolder.deadend = true;
+                    stateHolder.page = 0;
+                } else {
+                    stateHolder.page += 1;
+                }
             }
             isReading = false;
         }

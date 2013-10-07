@@ -21,7 +21,6 @@ public final class VolleyHolder {
         if(_requestQueue == null) {
             _requestQueue = Volley.newRequestQueue(context);
         }
-
         return _requestQueue;
     }
 }

@@ -243,8 +243,14 @@ public class MainActivity extends Activity implements ContentFragment.ContentCha
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             drawerLayout.closeDrawer(drawer);
             ListView list = (ListView)parent;
-            String item = (String)list.getItemAtPosition(position);
-            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTagItems(item, 1));
+            Tag item = (Tag)list.getItemAtPosition(position);
+//            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTagItems(item));
+
+            ContentFragment fragment = (ContentFragment)fragmentManager.findFragmentByTag("content");
+            if(fragment == null) {
+                fragment = ContentFragment.newInstance();
+            }
+            fragment.resetStateHolder(QiitaAPI.getTagItems(item.url_name));
             //TODO: tag click -> list content with tag
         }
     }
@@ -266,11 +272,12 @@ public class MainActivity extends Activity implements ContentFragment.ContentCha
             if(fragment == null) {
                 fragment = ContentFragment.newInstance();
             }
-            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTopViewItems(QiitaAPI.STOCKS, _token));
-            fragment.setArguments(_fragmentArgs);
-
-            FragmentTransaction ts = fragmentManager.beginTransaction();
-            ts.replace(R.id.content_frame, fragment, "content").commit();
+            fragment.resetStateHolder(QiitaAPI.getTopViewItems(QiitaAPI.STOCKS, _token));
+//            _fragmentArgs.putString(App.API_URL, QiitaAPI.getTopViewItems(QiitaAPI.STOCKS, _token));
+//            fragment.setArguments(_fragmentArgs);
+//
+//            FragmentTransaction ts = fragmentManager.beginTransaction();
+//            ts.replace(R.id.content_frame, fragment, "content").commit();
         }
     }
 

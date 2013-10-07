@@ -63,9 +63,9 @@ public class QiitaAPI {
         val += SUFFIX_PER_PAGE;
     }
 
-    public static String getTagItems(String tag, int page) {
+    public static String getTagItems(String tag) {
         String val = BASE_URL;
-        val += SUFFIX_TAGS + SEPARATOR + tag + SUFFIX_ITEMS + getPage(page);
+        val += SUFFIX_TAGS + SEPARATOR + tag + SUFFIX_ITEMS;
 
         return val;
     }
